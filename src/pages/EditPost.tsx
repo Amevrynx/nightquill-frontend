@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { postsAPI } from "../services/api";
@@ -17,24 +17,12 @@ const EditPost: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/login");
-      return;
-    }
+  const fetchPost = useCallback(async () => {
+    if (!id) return;
 
-    if (!id) {
-      navigate("/my-posts");
-      return;
-    }
-
-    fetchPost();
-  }, [isAuthenticated, navigate, id]);
-
-  const fetchPost = async () => {
     try {
       setFetchLoading(true);
-      const response = await postsAPI.getPost(id!);
+      const response = await postsAPI.getPost(id);
       const post = response.data;
 
       setTitle(post.title);
@@ -47,7 +35,21 @@ const EditPost: React.FC = () => {
     } finally {
       setFetchLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
+    if (!id) {
+      navigate("/my-posts");
+      return;
+    }
+
+    fetchPost();
+  }, [isAuthenticated, navigate, id, fetchPost]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,7 +97,7 @@ const EditPost: React.FC = () => {
     <div style={styles.outer}>
       <div style={styles.candleGlow}></div>
 
-      <div style={styles.formContainer} className="fadeInUp">
+      <div style={styles.formContainer}>
         <div style={styles.header}>
           <h2 style={styles.title}>Edit Your Tale</h2>
           <button
@@ -186,28 +188,6 @@ const EditPost: React.FC = () => {
           </div>
         </form>
       </div>
-
-      <style>{`
-        @keyframes candleLight {
-          0%, 100% { opacity: 0.6; }
-          50% { opacity: 0.85; }
-        }
-
-        @keyframes fadeInUp {
-          0% { opacity: 0; transform: translateY(40px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-
-        .fadeInUp {
-          animation: fadeInUp 1.5s ease forwards;
-        }
-
-        input:focus, textarea:focus {
-          box-shadow: 0 0 12px rgba(107,78,46,0.3);
-          outline: none;
-          background-color: rgba(255, 255, 240, 0.8);
-        }
-      `}</style>
     </div>
   );
 };

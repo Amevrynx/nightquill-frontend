@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { postsAPI } from "../services/api";
@@ -20,9 +20,24 @@ const ViewPost: React.FC = () => {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   const { user } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+
+  const fetchPost = useCallback(async () => {
+    if (!id) return;
+
+    try {
+      setLoading(true);
+      const response = await postsAPI.getPost(id);
+      setPost(response.data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to load post");
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
 
   useEffect(() => {
     if (!id) {
@@ -30,19 +45,7 @@ const ViewPost: React.FC = () => {
       return;
     }
     fetchPost();
-  }, [id, navigate]);
-
-  const fetchPost = async () => {
-    try {
-      setLoading(true);
-      const response = await postsAPI.getPost(id!);
-      setPost(response.data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to load post");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [id, navigate, fetchPost]);
 
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString("en-US", {
@@ -62,7 +65,7 @@ const ViewPost: React.FC = () => {
       ) : null
     );
 
-  const isAuthor = user && post && post.author && user.id === post.author._id;
+  const isAuthor = user && post?.author && user.id === post.author._id;
 
   if (loading)
     return (
@@ -103,12 +106,11 @@ const ViewPost: React.FC = () => {
     <div style={styles.outer}>
       <div style={styles.inkGlow}></div>
       <article style={styles.article}>
-        {/* Navigation */}
+        {/* Top bar */}
         <div style={styles.topBar}>
           <Link to="/" style={styles.backLink}>
             ← Return to All Tales
           </Link>
-
           {isAuthor && (
             <Link to={`/edit-post/${post._id}`} style={styles.editButton}>
               Edit Post
@@ -119,7 +121,6 @@ const ViewPost: React.FC = () => {
         {/* Header */}
         <header style={styles.header}>
           <h1 style={styles.title}>{post.title}</h1>
-
           <div style={styles.meta}>
             <span>
               By <strong>{post.author?.username || "Unknown Scribe"}</strong>

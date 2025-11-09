@@ -7,7 +7,7 @@ const Profile: React.FC = () => {
   const [profile, setProfile] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [_error, setError] = useState("");
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
 
