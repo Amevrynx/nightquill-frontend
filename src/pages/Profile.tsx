@@ -7,7 +7,6 @@ const Profile: React.FC = () => {
   const [profile, setProfile] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [_error, setError] = useState("");
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -25,7 +24,7 @@ const Profile: React.FC = () => {
       const response = await authAPI.getMe();
       setProfile(response.data.user);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to load profile");
+      Error("Failed to load profile");
     }
   };
 
@@ -47,7 +46,7 @@ const Profile: React.FC = () => {
         totalViews,
       });
     } catch {
-      setError("Failed to load stats");
+      Error("Failed to load stats");
     } finally {
       setLoading(false);
     }

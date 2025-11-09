@@ -19,7 +19,7 @@ const MyPosts: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [_actionLoading, setActionLoading] = useState<string | null>(null);
+  const [setActionLoading] = useState<string | null>(null);
 
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -47,19 +47,16 @@ const MyPosts: React.FC = () => {
   const handleDelete = async (postId: string) => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
     try {
-      setActionLoading(postId);
       await postsAPI.deletePost(postId);
       setPosts(posts.filter((post) => post._id !== postId));
     } catch (err: any) {
       alert(err.response?.data?.message || "Failed to delete post");
     } finally {
-      setActionLoading(null);
     }
   };
 
   const handleTogglePublish = async (postId: string, currentStatus: boolean) => {
     try {
-      setActionLoading(postId);
       const response = await postsAPI.updatePost(postId, {
         published: !currentStatus,
       });
@@ -73,7 +70,6 @@ const MyPosts: React.FC = () => {
     } catch (err: any) {
       alert(err.response?.data?.message || "Failed to update post status");
     } finally {
-      setActionLoading(null);
     }
   };
 
