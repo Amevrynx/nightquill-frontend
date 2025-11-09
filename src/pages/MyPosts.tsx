@@ -19,7 +19,6 @@ const MyPosts: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [] = useState<string | null>(null);
 
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
